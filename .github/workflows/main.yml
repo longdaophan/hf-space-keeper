@@ -2,19 +2,41 @@ name: Keep HF Space Alive
 
 on:
   schedule:
-    - cron: '*/30 8-23 * * *'  # Mỗi 30 phút, từ 8h-23h
+    # Chạy 1 lần/ngày vào lúc 1h UTC (8h sáng giờ Việt Nam)
+    - cron: '0 1 * * *'
   workflow_dispatch:  # Cho phép chạy thủ công
 
 jobs:
   ping:
     runs-on: ubuntu-latest
     steps:
-      - name: Random delay
-        run: sleep $((RANDOM % 300))
+      - name: Random delay trong khung giờ 8h-23h
+        run: |
+          # Tính số giây từ 0-15 giờ (8h VN - 23h VN = 15 tiếng = 54000 giây)
+          RANDOM_DELAY=$((RANDOM % 54000))
+          echo "⏰ Đợi $RANDOM_DELAY giây trước khi ping..."
+          echo "⏰ Tương đương $(($RANDOM_DELAY / 3600)) giờ $(($RANDOM_DELAY % 3600 / 60)) phút"
+          sleep $RANDOM_DELAY
       
       - name: Ping Hugging Face Space
         run: |
-          curl -A "Mozilla/5.0" \
-               -H "Accept: text/html" \
-               https://huggingface.co/spaces/Rick-D/Khoa_luan
+          echo "🚀 Bắt đầu ping Space..."
+          response=$(curl -s -o /dev/null -w "%{http_code}" \
+                     -A "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36" \
+                     -H "Accept: text/html,application/xhtml+xml" \
+                     -H "Accept-Language: vi-VN,vi;q=0.9,en;q=0.8" \
+                     https://huggingface.co/spaces/USERNAME/SPACE_NAME)
+          
+          echo "📡 Response code: $response"
+          
+          if [ $response -eq 200 ] || [ $response -eq 302 ]; then
+            echo "✅ Space đang hoạt động tốt!"
+          else
+            echo "⚠️ Space trả về mã $response (có thể đang khởi động lại)"
+          fi
         continue-on-error: true
+      
+      - name: Thông báo hoàn thành
+        run: |
+          echo "✨ Hoàn thành ping vào $(date '+%Y-%m-%d %H:%M:%S UTC')"
+          echo "🇻🇳 Tương đương $(TZ='Asia/Ho_Chi_Minh' date '+%Y-%m-%d %H:%M:%S') giờ Việt Nam"
