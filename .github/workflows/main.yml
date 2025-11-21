@@ -10,10 +10,10 @@ jobs:
   ping:
     runs-on: ubuntu-latest
     steps:
-      - name: Random delay trong khung giờ 8h-23h
+      - name: Random delay trong khung giờ 8h-14h
         run: |
-          # Tính số giây từ 0-15 giờ (8h VN - 23h VN = 15 tiếng = 54000 giây)
-          RANDOM_DELAY=$((RANDOM % 54000))
+          # Tính số giây từ 0-6 giờ (8h VN - 14h VN = 6 tiếng = 21600 giây)
+          RANDOM_DELAY=$((RANDOM % 21600))
           echo "⏰ Đợi $RANDOM_DELAY giây trước khi ping..."
           echo "⏰ Tương đương $(($RANDOM_DELAY / 3600)) giờ $(($RANDOM_DELAY % 3600 / 60)) phút"
           sleep $RANDOM_DELAY
@@ -25,7 +25,7 @@ jobs:
                      -A "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36" \
                      -H "Accept: text/html,application/xhtml+xml" \
                      -H "Accept-Language: vi-VN,vi;q=0.9,en;q=0.8" \
-                     https://huggingface.co/spaces/USERNAME/SPACE_NAME)
+                     https://huggingface.co/spaces/Rick-D/Khoa_luan)
           
           echo "📡 Response code: $response"
           
