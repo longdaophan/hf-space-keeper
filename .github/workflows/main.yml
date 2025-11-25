@@ -1,11 +1,9 @@
 name: Keep HF Space Alive
-
 on:
   schedule:
     # Chạy 1 lần/ngày vào lúc 1h UTC (8h sáng giờ Việt Nam)
     - cron: '0 1 * * *'
   workflow_dispatch:  # Cho phép chạy thủ công
-
 jobs:
   ping:
     runs-on: ubuntu-latest
@@ -20,19 +18,35 @@ jobs:
       
       - name: Ping Hugging Face Space
         run: |
-          echo "🚀 Bắt đầu ping Space..."
+          echo "🚀 Bắt đầu đánh thức Space..."
           response=$(curl -s -o /dev/null -w "%{http_code}" \
                      -A "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36" \
                      -H "Accept: text/html,application/xhtml+xml" \
                      -H "Accept-Language: vi-VN,vi;q=0.9,en;q=0.8" \
-                     https://huggingface.co/spaces/Rick-D/Khoa_luan)
+                     --max-time 60 \
+                     --retry 2 \
+                     https://rick-d-khoa-luan.hf.space)
           
           echo "📡 Response code: $response"
           
-          if [ $response -eq 200 ] || [ $response -eq 302 ]; then
-            echo "✅ Space đang hoạt động tốt!"
+          if [ $response -eq 200 ]; then
+            echo "✅ Space đã tỉnh và đang chạy!"
+          elif [ $response -eq 502 ] || [ $response -eq 503 ]; then
+            echo "⏳ Space đang khởi động (502/503)..."
+            echo "🔄 Đợi 30 giây rồi thử lại..."
+            sleep 30
+            response2=$(curl -s -o /dev/null -w "%{http_code}" \
+                       -A "Mozilla/5.0" \
+                       --max-time 60 \
+                       https://rick-d-khoa-luan.hf.space)
+            echo "📡 Response code lần 2: $response2"
+            if [ $response2 -eq 200 ]; then
+              echo "✅ Space đã tỉnh thành công!"
+            else
+              echo "⚠️ Space vẫn đang khởi động, cần thêm thời gian"
+            fi
           else
-            echo "⚠️ Space trả về mã $response (có thể đang khởi động lại)"
+            echo "⚠️ Space trả về mã $response"
           fi
         continue-on-error: true
       
