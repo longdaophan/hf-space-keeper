@@ -25,7 +25,7 @@ jobs:
                      -H "Accept-Language: vi-VN,vi;q=0.9,en;q=0.8" \
                      --max-time 60 \
                      --retry 2 \
-                     https://rick-d-khoa-luan.hf.space)
+                     https://rick-d-model-server.hf.space)
           
           echo "📡 Response code: $response"
           
